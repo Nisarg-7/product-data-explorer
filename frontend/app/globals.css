@@ -1,0 +1,32 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-white text-gray-900;
+}
+
+/* Prose styles for markdown content */
+.prose {
+  @apply max-w-none;
+}
+
+.prose h2 {
+  @apply mb-4 mt-6 text-2xl font-bold;
+}
+
+.prose p {
+  @apply mb-4 leading-relaxed text-gray-700;
+}
+
+.prose ul {
+  @apply mb-4 list-inside list-disc space-y-2 text-gray-700;
+}
+
+.prose a {
+  @apply text-blue-600 hover:underline;
+}

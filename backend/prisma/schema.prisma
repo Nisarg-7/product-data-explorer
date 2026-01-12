@@ -1,0 +1,163 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// CORE ENTITIES
+// ============================================================================
+
+model Navigation {
+  id                Int         @id @default(autoincrement())
+  title             String      @unique
+  slug              String      @unique
+  description       String?
+  lastScrapedAt     DateTime?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  categories        Category[]
+  scrapeJobs        ScrapeJob[]
+
+  @@index([lastScrapedAt])
+  @@map("navigation")
+}
+
+model Category {
+  id                Int         @id @default(autoincrement())
+  navigationId      Int
+  parentId          Int?
+  title             String
+  slug              String
+  description       String?
+  productCount      Int         @default(0)
+  lastScrapedAt     DateTime?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  navigation        Navigation  @relation(fields: [navigationId], references: [id], onDelete: Cascade)
+  parent            Category?   @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children          Category[]  @relation("CategoryHierarchy")
+  products          Product[]
+  scrapeJobs        ScrapeJob[]
+
+  @@unique([navigationId, slug])
+  @@index([navigationId])
+  @@index([parentId])
+  @@index([lastScrapedAt])
+  @@map("category")
+}
+
+model Product {
+  id                Int             @id @default(autoincrement())
+  sourceId          String          @unique
+  sourceUrl         String          @unique
+  title             String
+  author            String?
+  price             Float?          // Using Float instead of Decimal for SQLite
+  currency          String          @default("GBP")
+  imageUrl          String?
+  categoryId        Int
+  lastScrapedAt     DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  category          Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  detail            ProductDetail?
+  reviews           Review[]
+  viewHistory       ViewHistory[]
+  scrapeJobs        ScrapeJob[]
+
+  @@index([categoryId])
+  @@index([sourceId])
+  @@index([lastScrapedAt])
+  @@map("product")
+}
+
+model ProductDetail {
+  id                Int         @id @default(autoincrement())
+  productId         Int         @unique
+  description       String?
+  isbn              String?
+  publisher         String?
+  publicationDate   DateTime?
+  pages             Int?
+  specs             String?     // JSON stored as string for SQLite
+  ratingsAvg        Float?      // Using Float instead of Decimal for SQLite
+  reviewsCount      Int         @default(0)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  product           Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  @@map("product_detail")
+}
+
+model Review {
+  id                Int         @id @default(autoincrement())
+  productId         Int
+  author            String?
+  rating            Int         @default(5)
+  text              String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  product           Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([createdAt])
+  @@map("review")
+}
+
+// ============================================================================
+// SYSTEM ENTITIES
+// ============================================================================
+
+model ScrapeJob {
+  id                String          @id @default(cuid())
+  navigationId      Int?
+  categoryId        Int?
+  productId         Int?
+  targetUrl         String
+  targetType        String          // NAVIGATION | CATEGORY | PRODUCT | PRODUCT_DETAIL | PRODUCT_LIST
+  status            String          @default("PENDING")  // PENDING | RUNNING | COMPLETED | FAILED | RETRY
+  retryCount        Int             @default(0)
+  startedAt         DateTime?
+  finishedAt        DateTime?
+  errorLog          String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  navigation        Navigation?     @relation(fields: [navigationId], references: [id], onDelete: SetNull)
+  category          Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  product           Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([targetType])
+  @@index([createdAt])
+  @@index([navigationId])
+  @@index([categoryId])
+  @@index([productId])
+  @@map("scrape_job")
+}
+
+model ViewHistory {
+  id                Int         @id @default(autoincrement())
+  sessionId         String      // Client-generated UUID
+  userId            String?     // Optional for authenticated users
+  productId         Int?
+  pathJson          String?     // JSON stored as string for SQLite: { path: "/categories/books", timestamp }
+  referer           String?
+  userAgent         String?
+  createdAt         DateTime    @default(now())
+
+  product           Product?    @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@map("view_history")
+}
