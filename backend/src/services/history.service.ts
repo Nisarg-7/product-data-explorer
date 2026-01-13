@@ -50,7 +50,7 @@ export class HistoryService {
 
     return {
       sessionId,
-      views: views.map((v) => ({
+      views: views.map((v: any) => ({
         id: v.id,
         sessionId: v.sessionId,
         path: (v.pathJson as any).path,
