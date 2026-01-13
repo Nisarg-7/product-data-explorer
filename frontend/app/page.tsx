@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { Suspense } from 'react';
 import { NavigationGrid } from '@/components/NavigationGrid';
 import { PageHeader } from '@/components/PageHeader';
