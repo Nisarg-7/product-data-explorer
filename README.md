@@ -1497,3 +1497,24 @@ For issues or questions:
 **Status**: Complete and ready for submission
 
 Built with ❤️ using NestJS, Next.js, PostgreSQL, Crawlee, and Playwright
+
+
+## ⚠️ Production Deployment Limitation
+
+The application is deployed on Vercel (serverless environment).
+
+Due to serverless limitations:
+
+- SQLite file-based databases cannot persist data
+- Redis is not available for background jobs
+- Web scraping and queue workers cannot run continuously
+
+Because of this, live data fetching is not active in production deployment and API calls may return errors.
+
+However, the complete backend logic, database models, scraping services, API routes, and job queues are fully implemented and work correctly in local development setup using:
+
+- SQLite
+- Redis
+- Background scraping workers
+
+This deployment is intended to demonstrate full-stack system design and implementation rather than production-scale data collection.
