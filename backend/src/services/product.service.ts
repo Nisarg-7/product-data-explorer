@@ -140,13 +140,13 @@ export class ProductService {
           : null,
         reviewsCount: product.detail?.reviewsCount || 0,
       },
-      reviews: product.reviews.map((r) => ({
+      reviews: product.reviews.map((r: any) => ({
         id: r.id,
         author: r.author,
         rating: r.rating,
         text: r.text,
       })),
-      recommendations: recommendations.map((p) => ({
+      recommendations: recommendations.map((p: any) => ({
         id: p.id,
         sourceId: p.sourceId,
         sourceUrl: p.sourceUrl,
