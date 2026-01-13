@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import type { Metadata } from 'next';
 import { ReactNode } from 'react';
 import { Providers } from './providers';
