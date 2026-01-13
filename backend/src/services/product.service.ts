@@ -44,7 +44,7 @@ export class ProductService {
 
     const ttlHours = parseInt(process.env.SCRAPE_TTL_PRODUCT_HOURS || '7');
 
-    const items: ProductGridDto[] = products.map((p) => {
+    const items: ProductGridDto[] = products.map((p: any) => {
       const isStale = this.isStaleData(p.lastScrapedAt, ttlHours);
       return {
         id: p.id,
